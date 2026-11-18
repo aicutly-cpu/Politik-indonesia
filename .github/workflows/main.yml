@@ -1,0 +1,35 @@
+name: Render video
+
+on:
+  workflow_dispatch:
+
+jobs:
+  render:
+    runs-on: ubuntu-latest
+    timeout-minutes: 90
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+      - name: Ekstrak ZIP proyek
+        run: unzip -o POLITICAL_DOCUMENTARY_*.zip
+      - name: Paket sistem
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y fonts-liberation libnss3 libdbus-1-3 libatk1.0-0 \
+            libatk-bridge2.0-0 libasound2t64 libxrandr2 libxkbcommon-dev libxfixes3 \
+            libxcomposite1 libxdamage1 libgbm-dev libcups2 libpango-1.0-0 libcairo2
+      - name: Pasang dependensi
+        working-directory: political-documentary
+        run: npm install
+      - name: Unduh browser Remotion
+        working-directory: political-documentary
+        run: npx remotion browser ensure
+      - name: Render
+        working-directory: political-documentary
+        run: bash render.sh
+      - uses: actions/upload-artifact@v4
+        with:
+          name: video-dokumenter
+          path: political-documentary/out/*.mp4
